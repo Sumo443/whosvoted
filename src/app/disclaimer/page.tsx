@@ -87,7 +87,7 @@ export default function DisclaimerPage() {
         </h2>
         <p className="text-sm text-gray-600 leading-relaxed">
           データの誤りを発見された場合や、ご質問がある場合は、
-          Xアカウント
+          X（Twitter）アカウント
           <a
             href="https://x.com/WhoVotedJP"
             target="_blank"
@@ -96,7 +96,7 @@ export default function DisclaimerPage() {
           >
             @WhoVotedJP
           </a>
-          までDMまたはリプライにてお知らせください。
+          までDMにてお知らせください。
           可能な限り迅速に対応いたします。
         </p>
       </section>
