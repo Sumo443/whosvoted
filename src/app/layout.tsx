@@ -38,6 +38,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <meta name="google-site-verification" content="9TJo8tXl2_FZQyJw7c8hXuScs7RD-EjNdj_VdMXc338" />
       </head>
       <body className="bg-white text-gray-900 min-h-screen flex flex-col">
         <Nav />
