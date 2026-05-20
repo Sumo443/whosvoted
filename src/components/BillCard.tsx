@@ -27,9 +27,9 @@ export default function BillCard({ bill }: Props) {
           {bill.session_number ? ` 第${bill.session_number}回国会` : ""}
         </p>
         <p className="text-xs text-gray-500">
-          <span className="text-[#1D9E75] font-medium">{bill.yea_count}</span>
+          <span className="text-[#1D9E75] font-medium">賛成 {bill.yea_count}票</span>
           {" ／ "}
-          <span className="text-red-400 font-medium">{bill.nay_count}</span>
+          <span className="text-red-400 font-medium">反対 {bill.nay_count}票</span>
         </p>
       </div>
     </Link>

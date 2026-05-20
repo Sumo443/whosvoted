@@ -107,7 +107,7 @@ export default function BillDetailPage({ params }: Props) {
               {members.map((m) => (
                 <Link
                   key={m.member_name}
-                  href={`/member/${encodeURIComponent(m.member_name)}`}
+                  href={`/member/${m.member_name}`}
                   className="text-sm px-2.5 py-1 bg-green-50 text-gray-700 rounded-md hover:bg-green-100 transition-colors"
                 >
                   {m.member_name}
@@ -134,7 +134,7 @@ export default function BillDetailPage({ params }: Props) {
               {members.map((m) => (
                 <Link
                   key={m.member_name}
-                  href={`/member/${encodeURIComponent(m.member_name)}`}
+                  href={`/member/${m.member_name}`}
                   className="text-sm px-2.5 py-1 bg-red-50 text-gray-700 rounded-md hover:bg-red-100 transition-colors"
                 >
                   {m.member_name}

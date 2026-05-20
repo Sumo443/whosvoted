@@ -13,11 +13,11 @@ interface Props {
 
 export async function generateStaticParams() {
   const members = getMembers();
-  return members.map((m) => ({ name: encodeURIComponent(m.member_name) }));
+  return members.map((m) => ({ name: m.member_name }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const name = decodeURIComponent(params.name);
+  const name = params.name;
   const member = getMemberDetailByName(name);
   if (!member) return { title: "議員が見つかりません" };
 
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default function MemberPage({ params }: Props) {
-  const name = decodeURIComponent(params.name);
+  const name = params.name;
   const member = getMemberDetailByName(name);
   if (!member) notFound();
 
@@ -138,7 +138,7 @@ export default function MemberPage({ params }: Props) {
             {member.similar_members.map((sm) => (
               <Link
                 key={sm.member_name}
-                href={`/member/${encodeURIComponent(sm.member_name)}`}
+                href={`/member/${sm.member_name}`}
                 className="border border-gray-100 rounded-lg p-4 hover:border-[#1D9E75] transition-all"
               >
                 <div className="flex items-center gap-3">

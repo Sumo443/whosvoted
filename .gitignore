@@ -3,3 +3,9 @@ node_modules/
 out/
 /data/
 /public/data/
+
+# Large generated files from scripts/voting_watcher
+scripts/voting_watcher/votes.db
+scripts/voting_watcher/votes.csv
+scripts/voting_watcher/last_fetched.txt
+scripts/voting_watcher/members.csv

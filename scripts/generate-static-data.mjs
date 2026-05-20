@@ -72,7 +72,7 @@ console.log(`  → ${bills.length}`);
 console.log("[generate] search index...");
 const searchIndex = [];
 for (const m of members) {
-  searchIndex.push({ type: "member", label: m.member_name, sub: m.party || "", url: `/member/${encodeURIComponent(m.member_name)}` });
+  searchIndex.push({ type: "member", label: m.member_name, sub: m.party || "", url: `/member/${m.member_name}` });
 }
 const seenBill = new Set();
 for (const b of bills) {
@@ -206,7 +206,7 @@ fs.writeFileSync(path.join(publicDir, "robots.txt"), `User-agent: *\nAllow: /\nS
 
 const base = "https://whosvoted.com";
 const sitemapUrls = [`${base}/`, `${base}/members`, `${base}/bills`, `${base}/maker`, `${base}/disclaimer`];
-for (const m of members) sitemapUrls.push(`${base}/member/${encodeURIComponent(m.member_name)}`);
+for (const m of members) sitemapUrls.push(`${base}/member/${m.member_name}`);
 for (const b of bills) sitemapUrls.push(`${base}/bill/${b.id}`);
 const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls.map(u => `  <url><loc>${u}</loc></url>`).join("\n")}\n</urlset>`;
 fs.writeFileSync(path.join(publicDir, "sitemap.xml"), xml, "utf-8");

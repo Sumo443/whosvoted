@@ -9,7 +9,7 @@ interface Props {
 export default function MemberCard({ member }: Props) {
   return (
     <Link
-      href={`/member/${encodeURIComponent(member.member_name)}`}
+      href={`/member/${member.member_name}`}
       className="flex-shrink-0 w-36 border border-gray-100 rounded-xl p-4 text-center hover:border-[#1D9E75] hover:shadow-sm transition-all"
     >
       <div className="flex justify-center mb-2">

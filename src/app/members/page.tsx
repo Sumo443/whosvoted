@@ -75,7 +75,7 @@ export default function MembersPage() {
         {filtered.map((member) => (
           <Link
             key={member.member_name}
-            href={`/member/${encodeURIComponent(member.member_name)}`}
+            href={`/member/${member.member_name}`}
             className="border border-gray-100 rounded-lg p-4 hover:border-[#1D9E75] hover:shadow-sm transition-all"
           >
             <InitialAvatar name={member.member_name} size={40} />

@@ -215,7 +215,7 @@ export default function MakerPage() {
                     一致率{r.match_rate}%
                   </span>
                   <Link
-                    href={`/member/${encodeURIComponent(r.member_name)}`}
+                    href={`/member/${r.member_name}`}
                     className="text-xs text-gray-300 hover:text-[#1D9E75]"
                   >
                     詳しく見る →
