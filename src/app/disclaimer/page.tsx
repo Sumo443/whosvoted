@@ -97,7 +97,7 @@ export default function DisclaimerPage() {
             @WhoVotedJP
           </a>
           までDMにてお知らせください。
-          可能な限り迅速に対応いたします。
+          対応にお時間をいただく場合がありますが、確認の上対応いたします。
         </p>
       </section>
     </div>
