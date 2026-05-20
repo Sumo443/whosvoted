@@ -1,43 +1,42 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import VoteBar from "@/components/VoteBar";
 import InitialAvatar from "@/components/InitialAvatar";
 import ShareButton from "@/components/ShareButton";
 import AdSlot from "@/components/AdSlot";
-import { getMemberDetailByName, getMembers } from "@/lib/data-loader";
+import { getMemberDetailById, getMembers } from "@/lib/data-loader";
+import type { Member } from "@/lib/data-loader";
 
 interface Props {
-  params: { name: string };
+  params: { id: string };
 }
 
 export async function generateStaticParams() {
   const members = getMembers();
-  return members.map((m) => ({ name: m.member_name }));
+  return members.map((m) => ({ id: m.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const name = params.name;
-  const member = getMemberDetailByName(name);
+  const member = getMemberDetailById(params.id);
   if (!member) return { title: "議員が見つかりません" };
 
   return {
-    title: `${name}の投票記録 | WHO VOTED`,
-    description: `${name}議員（${member.faction || member.party || ""}・${member.constituency || ""}）の記名投票記録。賛成${member.yea_votes}・反対${member.nay_votes}。`,
+    title: `${member.member_name}の投票記録 | WHO VOTED`,
+    description: `${member.member_name}議員（${member.faction || member.party || ""}・${member.constituency || ""}）の記名投票記録。賛成${member.yea_votes}・反対${member.nay_votes}。`,
     openGraph: {
-      title: `${name}の投票記録 | WHO VOTED`,
-      description: `${name}議員の記名投票記録を確認できます。`,
-      url: `https://whosvoted.com/member/${params.name}`,
+      title: `${member.member_name}の投票記録 | WHO VOTED`,
+      description: `${member.member_name}議員の記名投票記録を確認できます。`,
+      url: `https://whosvoted.com/member/${params.id}`,
     },
   };
 }
 
 export default function MemberPage({ params }: Props) {
-  const name = params.name;
-  const member = getMemberDetailByName(name);
+  const member = getMemberDetailById(params.id);
   if (!member) notFound();
 
-  const shareText = `【WHO VOTED】${name}議員の投票記録\n→ whosvoted.com/member/${params.name}`;
+  const name = member.member_name;
+  const shareText = `【WHO VOTED】${name}議員の投票記録\n→ whosvoted.com/member/${params.id}`;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -90,7 +89,7 @@ export default function MemberPage({ params }: Props) {
 
       {/* シェア */}
       <div className="mb-6">
-        <ShareButton text={shareText} url={`https://whosvoted.com/member/${params.name}`} />
+        <ShareButton text={shareText} url={`https://whosvoted.com/member/${params.id}`} />
       </div>
 
       {/* 投票履歴 */}
@@ -138,7 +137,7 @@ export default function MemberPage({ params }: Props) {
             {member.similar_members.map((sm) => (
               <Link
                 key={sm.member_name}
-                href={`/member/${sm.member_name}`}
+                href={`/member/${sm.id || ""}`}
                 className="border border-gray-100 rounded-lg p-4 hover:border-[#1D9E75] transition-all"
               >
                 <div className="flex items-center gap-3">

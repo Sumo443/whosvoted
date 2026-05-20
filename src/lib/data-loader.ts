@@ -18,21 +18,36 @@ export type Member = {
 };
 export type SearchItem = { type: "member" | "bill"; label: string; sub: string; url: string };
 export type Faction = { name: string; count: number };
-export type MakerQuestion = { bill_name: string; date: string; yeas: string[]; nays: string[] };
+export type MakerQuestionMember = { member_name: string; id: string };
+export type MakerQuestion = { bill_name: string; date: string; yeas: MakerQuestionMember[]; nays: MakerQuestionMember[] };
+
+export interface BillMemberEntry {
+  member_name: string;
+  party: string | null;
+  id?: string;
+}
 
 export type BillDetail = {
   bill_name: string; date: string; session_number: number; issue_id: string;
   yea_count: number; nay_count: number;
-  yea_groups: Record<string, { member_name: string; party: string | null }[]>;
-  nay_groups: Record<string, { member_name: string; party: string | null }[]>;
+  yea_groups: Record<string, BillMemberEntry[]>;
+  nay_groups: Record<string, BillMemberEntry[]>;
+};
+
+export type SimilarMember = {
+  member_name: string;
+  id?: string;
+  match_rate: number;
+  party: string | null;
+  faction: string | null;
 };
 
 export type MemberDetail = {
-  member_name: string; reading: string | null; party: string | null;
+  member_name: string; id?: string; reading: string | null; party: string | null;
   faction: string | null; constituency: string | null; election_count: number | null;
   total_votes: number; yea_votes: number; nay_votes: number;
   votes: { bill_name: string; date: string; vote: "賛成" | "反対"; issue_id: string; session_number: number }[];
-  similar_members: { member_name: string; match_rate: number; party: string | null; faction: string | null }[];
+  similar_members: SimilarMember[];
 };
 
 // ======== Loaders ========
@@ -47,7 +62,21 @@ export function getBillDetail(id: string): BillDetail | null {
   return all[id] || null;
 }
 
-export function getMemberDetailByName(name: string): MemberDetail | null {
+export function getMemberDetailById(id: string): MemberDetail | null {
   const all = readJson<Record<string, MemberDetail>>("members-detail.json");
-  return all[name] || null;
+  return all[id] || null;
+}
+
+/** @deprecated Use getMemberDetailById instead */
+export function getMemberDetailByName(name: string): MemberDetail | null {
+  const members = getMembers();
+  const m = members.find(m => m.member_name === name);
+  if (!m || !m.id) return null;
+  return getMemberDetailById(m.id);
+}
+
+export function getMemberIdByName(name: string): string | null {
+  const members = getMembers();
+  const m = members.find(m => m.member_name === name);
+  return m?.id || null;
 }

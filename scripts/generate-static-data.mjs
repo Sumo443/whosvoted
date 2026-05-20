@@ -38,16 +38,25 @@ function fileSafeId(name) {
 
 const db = new Database(DB_PATH, { readonly: true });
 
-// ======== 1. Members ========
-console.log("[generate] members...");
-const members = db.prepare(
+// ======== 0. Build member name → ID lookup ========
+// (built first so everything can use it)
+console.log("[generate] building member index...");
+const memberRows = db.prepare(
   `SELECT DISTINCT member_name, reading, party, faction, constituency, election_count
    FROM members ORDER BY reading`
 ).all();
-for (const m of members) {
+const members = memberRows.map((m) => {
   m.member_name = m.member_name.trim();
   m.id = fileSafeId(m.member_name);
+  return m;
+});
+const memberIdByName = {};
+for (const m of members) {
+  memberIdByName[m.member_name] = m.id;
 }
+
+// ======== 1. Members ========
+console.log("[generate] members...");
 fs.writeFileSync(path.join(OUT_DIR, "members.json"), JSON.stringify(members), "utf-8");
 console.log(`  → ${members.length}`);
 
@@ -72,7 +81,7 @@ console.log(`  → ${bills.length}`);
 console.log("[generate] search index...");
 const searchIndex = [];
 for (const m of members) {
-  searchIndex.push({ type: "member", label: m.member_name, sub: m.party || "", url: `/member/${m.member_name}` });
+  searchIndex.push({ type: "member", label: m.member_name, sub: m.party || "", url: `/member/${m.id}` });
 }
 const seenBill = new Set();
 for (const b of bills) {
@@ -108,7 +117,7 @@ const makerBills = db.prepare(
 const makerQuestions = makerBills.map((bill) => {
   const rows = db.prepare(`SELECT member_name, vote FROM votes WHERE bill_name=? AND issue_id=?`).all(bill.bill_name, bill.issue_id);
   const yeas = [], nays = [];
-  for (const r of rows) { if (r.vote === "賛成") yeas.push(r.member_name); else nays.push(r.member_name); }
+  for (const r of rows) { if (r.vote === "賛成") yeas.push({ member_name: r.member_name, id: memberIdByName[r.member_name] || "" }); else nays.push({ member_name: r.member_name, id: memberIdByName[r.member_name] || "" }); }
   return { bill_name: bill.bill_name, date: bill.date, yeas, nays };
 });
 fs.writeFileSync(path.join(OUT_DIR, "maker-questions.json"), JSON.stringify(makerQuestions), "utf-8");
@@ -127,8 +136,10 @@ for (const bill of bills) {
   const yeaGroups = {}, nayGroups = {};
   for (const r of rows) {
     const f = r.faction || "不明";
-    if (r.vote === "賛成") { if (!yeaGroups[f]) yeaGroups[f] = []; yeaGroups[f].push({ member_name: r.member_name, party: r.party }); }
-    else { if (!nayGroups[f]) nayGroups[f] = []; nayGroups[f].push({ member_name: r.member_name, party: r.party }); }
+    // Include member id along with name for linking
+    const entry = { member_name: r.member_name, party: r.party, id: memberIdByName[r.member_name] || "" };
+    if (r.vote === "賛成") { if (!yeaGroups[f]) yeaGroups[f] = []; yeaGroups[f].push(entry); }
+    else { if (!nayGroups[f]) nayGroups[f] = []; nayGroups[f].push(entry); }
   }
   billsDetail[bill.id] = {
     bill_name: bill.bill_name, date: bill.date, session_number: bill.session_number,
@@ -140,7 +151,7 @@ for (const bill of bills) {
 fs.writeFileSync(path.join(OUT_DIR, "bills-detail.json"), JSON.stringify(billsDetail), "utf-8");
 console.log(`  → ${bcnt}`);
 
-// ======== 7. Members Detail (merged single file) ========
+// ======== 7. Members Detail (merged single file, keyed by id) ========
 console.log("[generate] members detail...");
 
 // 全投票データからvoteMap構築
@@ -159,6 +170,7 @@ let mcnt = 0;
 for (const memberName of memberNames) {
   const mi = members.find(m => m.member_name === memberName);
   if (!mi) continue;
+  const mid = mi.id;
   const votes = db.prepare(
     `SELECT bill_name, date, vote, issue_id, session_number FROM votes WHERE member_name=? ORDER BY date DESC`
   ).all(memberName);
@@ -181,13 +193,14 @@ for (const memberName of memberNames) {
   scores.sort((a, b) => b.match_rate - a.match_rate || b.common_votes - a.common_votes);
   const similar = scores.slice(0, 3).map(s => ({
     member_name: s.member_name,
+    id: memberIdByName[s.member_name] || "",
     match_rate: s.match_rate,
     party: (members.find(m => m.member_name === s.member_name) || {}).party || null,
     faction: (members.find(m => m.member_name === s.member_name) || {}).faction || null,
   }));
 
-  membersDetail[memberName] = {
-    member_name: memberName, reading: mi.reading || null, party: mi.party || null,
+  membersDetail[mid] = {
+    member_name: memberName, id: mid, reading: mi.reading || null, party: mi.party || null,
     faction: mi.faction || null, constituency: mi.constituency || null,
     election_count: mi.election_count || null,
     total_votes: votes.length, yea_votes: yeaCount, nay_votes: nayCount,
@@ -206,7 +219,7 @@ fs.writeFileSync(path.join(publicDir, "robots.txt"), `User-agent: *\nAllow: /\nS
 
 const base = "https://whosvoted.com";
 const sitemapUrls = [`${base}/`, `${base}/members`, `${base}/bills`, `${base}/maker`, `${base}/disclaimer`];
-for (const m of members) sitemapUrls.push(`${base}/member/${m.member_name}`);
+for (const m of members) sitemapUrls.push(`${base}/member/${m.id}`);
 for (const b of bills) sitemapUrls.push(`${base}/bill/${b.id}`);
 const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls.map(u => `  <url><loc>${u}</loc></url>`).join("\n")}\n</urlset>`;
 fs.writeFileSync(path.join(publicDir, "sitemap.xml"), xml, "utf-8");

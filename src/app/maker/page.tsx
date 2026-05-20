@@ -19,7 +19,7 @@ export default function MakerPage() {
     new Array(questions.length).fill(null)
   );
   const [results, setResults] = useState<
-    { member_name: string; match_rate: number; faction: string | null }[]
+    { member_name: string; match_rate: number; faction: string | null; id: string | null }[]
   >([]);
 
   const progress =
@@ -63,8 +63,8 @@ export default function MakerPage() {
     const scores: Record<string, { match: number; total: number }> = {};
 
     for (const { answer, q } of answered) {
-      const yeaSet = new Set(q.yeas);
-      const naySet = new Set(q.nays);
+      const yeaSet = new Set(q.yeas.map(y => y.member_name));
+      const naySet = new Set(q.nays.map(n => n.member_name));
       // 全ての議員をチェック（全議員が全投票に参加しているわけではない）
       for (const member of membersList) {
         const name = member.member_name;
@@ -82,13 +82,15 @@ export default function MakerPage() {
     }
 
     const ranked = Object.entries(scores)
-      .map(([member_name, s]) => ({
-        member_name,
-        match_rate: Math.round((s.match / s.total) * 100),
-        faction:
-          membersList.find((m) => m.member_name === member_name)?.faction ||
-          null,
-      }))
+      .map(([member_name, s]) => {
+        const member = membersList.find((m) => m.member_name === member_name);
+        return {
+          member_name,
+          match_rate: Math.round((s.match / s.total) * 100),
+          faction: member?.faction || null,
+          id: member?.id || null,
+        };
+      })
       .filter((r) => r.match_rate > 0)
       .sort((a, b) => b.match_rate - a.match_rate)
       .slice(0, 3);
@@ -215,7 +217,7 @@ export default function MakerPage() {
                     一致率{r.match_rate}%
                   </span>
                   <Link
-                    href={`/member/${r.member_name}`}
+                    href={`/member/${r.id || ""}`}
                     className="text-xs text-gray-300 hover:text-[#1D9E75]"
                   >
                     詳しく見る →

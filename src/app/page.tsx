@@ -29,11 +29,12 @@ export default function HomePage() {
     .sort((a, b) => (b.election_count || 0) - (a.election_count || 0))
     .slice(0, 12);
 
+  const mkTag = (name: string) => ({ label: name, href: `/member/${allMembers.find(m => m.member_name === name)?.id || ""}` });
   const quickTags = [
-    { label: "高市早苗", href: "/member/高市早苗" },
-    { label: "野田佳彦", href: "/member/野田佳彦" },
+    mkTag("高市早苗"),
+    mkTag("野田佳彦"),
     { label: "令和8年度予算", href: `/bill/${allBills.find(b => b.bill_name.includes("予算"))?.id || ""}` },
-    { label: "河村たかし", href: "/member/河村たかし" },
+    mkTag("河村たかし"),
   ];
 
   return (
