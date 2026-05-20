@@ -49,11 +49,8 @@ export default function HomePage() {
           国会議員の投票記録データベース
         </p>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4">
-          だれが、
-          <span className="text-[#1D9E75]">賛成</span>
-          した？ だれが、
-          <span className="text-[#1D9E75]">反対</span>
-          した？
+          <span className="whitespace-nowrap">だれが、<span className="text-[#1D9E75]">賛成</span>した？</span><br />
+          <span className="whitespace-nowrap">だれが、<span className="text-[#1D9E75]">反対</span>した？</span>
         </h1>
         <p className="text-sm text-gray-500 mb-6">
           記名投票の全記録から、議員個人の行動を調べよう。
