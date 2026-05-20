@@ -37,6 +37,9 @@ export default function Footer() {
             このサイトは衆議院の記名投票のみを対象としています。
             全ての採決・参議院の投票は含まれません。
           </p>
+          <p className="text-xs text-gray-400 mt-2">
+            データ更新日：2026年3月13日
+          </p>
         </div>
         <p className="text-xs text-gray-300 mt-4">
           © {new Date().getFullYear()} WHO VOTED. This site is not affiliated

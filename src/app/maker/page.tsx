@@ -59,24 +59,34 @@ export default function MakerPage() {
       return;
     }
 
-    // 全議員のスコアを計算
+    // 全質問の参加者セットを事前計算
+    // 全ての質問に投票記録がある議員のみを対象にする
+    const questionSets = answered.map(({ q }) => ({
+      yeas: new Set(q.yeas.map(y => y.member_name)),
+      nays: new Set(q.nays.map(n => n.member_name)),
+    }));
+
+    // 全質問に投票している議員のみフィルタ
+    const qualifiedMembers = membersList.filter(member => {
+      const name = member.member_name;
+      return questionSets.every(qs => qs.yeas.has(name) || qs.nays.has(name));
+    });
+
+    // スコア計算
     const scores: Record<string, { match: number; total: number }> = {};
 
     for (const { answer, q } of answered) {
       const yeaSet = new Set(q.yeas.map(y => y.member_name));
       const naySet = new Set(q.nays.map(n => n.member_name));
-      // 全ての議員をチェック（全議員が全投票に参加しているわけではない）
-      for (const member of membersList) {
+      for (const member of qualifiedMembers) {
         const name = member.member_name;
         if (!scores[name]) scores[name] = { match: 0, total: 0 };
-        if (yeaSet.has(name) || naySet.has(name)) {
-          scores[name].total++;
-          if (
-            (answer === "賛成" && yeaSet.has(name)) ||
-            (answer === "反対" && naySet.has(name))
-          ) {
-            scores[name].match++;
-          }
+        scores[name].total++;
+        if (
+          (answer === "賛成" && yeaSet.has(name)) ||
+          (answer === "反対" && naySet.has(name))
+        ) {
+          scores[name].match++;
         }
       }
     }

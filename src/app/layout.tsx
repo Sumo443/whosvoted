@@ -10,10 +10,21 @@ export const metadata: Metadata = {
   },
   description:
     "国会議員の記名投票記録を可視化。議員ごとの賛否や法案ごとの採決結果を検索・比較できます。",
+  metadataBase: new URL("https://whosvoted.com"),
   openGraph: {
     type: "website",
     locale: "ja_JP",
     siteName: "WHO VOTED",
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 

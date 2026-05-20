@@ -105,13 +105,23 @@ export default function BillDetailPage({ params }: Props) {
             </h3>
             <div className="flex flex-wrap gap-2">
               {members.map((m) => (
-                <Link
-                  key={m.member_name}
-                  href={`/member/${m.id || ""}`}
-                  className="text-sm px-2.5 py-1 bg-green-50 text-gray-700 rounded-md hover:bg-green-100 transition-colors"
-                >
-                  {m.member_name}
-                </Link>
+                m.id ? (
+                  <Link
+                    key={m.member_name}
+                    href={`/member/${m.id}`}
+                    className="text-sm px-2.5 py-1 bg-green-50 text-gray-700 rounded-md hover:bg-green-100 transition-colors"
+                  >
+                    {m.member_name}
+                  </Link>
+                ) : (
+                  <span
+                    key={m.member_name}
+                    title="現役議員以外は個別ページ未対応"
+                    className="text-sm px-2.5 py-1 bg-gray-100 text-gray-400 rounded-md cursor-default"
+                  >
+                    {m.member_name}
+                  </span>
+                )
               ))}
             </div>
           </div>
@@ -132,13 +142,23 @@ export default function BillDetailPage({ params }: Props) {
             </h3>
             <div className="flex flex-wrap gap-2">
               {members.map((m) => (
-                <Link
-                  key={m.member_name}
-                  href={`/member/${m.id || ""}`}
-                  className="text-sm px-2.5 py-1 bg-red-50 text-gray-700 rounded-md hover:bg-red-100 transition-colors"
-                >
-                  {m.member_name}
-                </Link>
+                m.id ? (
+                  <Link
+                    key={m.member_name}
+                    href={`/member/${m.id}`}
+                    className="text-sm px-2.5 py-1 bg-red-50 text-gray-700 rounded-md hover:bg-red-100 transition-colors"
+                  >
+                    {m.member_name}
+                  </Link>
+                ) : (
+                  <span
+                    key={m.member_name}
+                    title="現役議員以外は個別ページ未対応"
+                    className="text-sm px-2.5 py-1 bg-gray-100 text-gray-400 rounded-md cursor-default"
+                  >
+                    {m.member_name}
+                  </span>
+                )
               ))}
             </div>
           </div>
