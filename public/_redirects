@@ -1,0 +1,3 @@
+# Cloudflare Pages _redirects
+# Handle 404s for SPA-like routing
+/*    /404.html    404
