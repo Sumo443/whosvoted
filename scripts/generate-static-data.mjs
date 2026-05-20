@@ -107,13 +107,26 @@ console.log(`  → ${factionList.length}`);
 
 // ======== 5. Maker Questions ========
 console.log("[generate] maker questions...");
-const makerBills = db.prepare(
-  `SELECT bill_name, date, issue_id
-   FROM votes GROUP BY bill_name, issue_id
-   HAVING SUM(CASE WHEN vote='賛成' THEN 1 ELSE 0 END) > 0
-      AND SUM(CASE WHEN vote='反対' THEN 1 ELSE 0 END) > 0
-   ORDER BY date DESC LIMIT 8`
-).all();
+// 多様なテーマ・賛否拮抗の法案を厳選（予算・解任決議案は3問以内）
+const makerBillDefs = [
+  ["笠浩史外六名提出財務金融委員長井林辰憲解任決議案", "2025-06-18"],
+  ["令和七年度一般会計予算外二案", "2025-03-04"],
+  ["臓器の移植に関する法律の一部を改正する法律案（第百六十四回国会、中山太郎外五名提出）", "2009-06-18"],
+  ["郵政民営化法案外五案", "2005-07-05"],
+  ["国民年金法等の一部を改正する法律を廃止する等の法律案", "2004-08-05"],
+  ["国民年金法等の一部を改正する法律案中修正議決した部分を除いたその他の原案", "2004-05-11"],
+  ["健康保険法等の一部を改正する法律案外一案", "2000-11-02"],
+  ["公職選挙法の一部を改正する法律案", "2000-10-26"],
+];
+const makerBills = [];
+for (const [bn, bd] of makerBillDefs) {
+  const issueRows = db.prepare(
+    `SELECT issue_id FROM votes WHERE bill_name=? AND date=? GROUP BY issue_id LIMIT 1`
+  ).all(bn, bd);
+  if (issueRows.length > 0) {
+    makerBills.push({ bill_name: bn, date: bd, issue_id: issueRows[0].issue_id });
+  }
+}
 // 法案説明を読み込み
 let makerDescriptions = {};
 try {

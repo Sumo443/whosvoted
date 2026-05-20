@@ -178,10 +178,15 @@ export default function MakerPage() {
           {currentQ + 1} / {questions.length}
         </p>
 
-        {/* 質問文（法案名は表示しない） */}
-        <h2 className="text-lg font-bold text-gray-900 mb-4 leading-relaxed">
+        {/* 質問文 */}
+        <h2 className="text-lg font-bold text-gray-900 mb-3 leading-relaxed">
           {q.question || q.bill_name}
         </h2>
+        {q.description && (
+          <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+            {q.description}
+          </p>
+        )}
 
         {/* 5段階回答 */}
         <div className="flex flex-col gap-2 mb-4">
