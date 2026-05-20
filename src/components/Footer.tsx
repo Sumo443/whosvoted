@@ -32,7 +32,13 @@ export default function Footer() {
             国会会議録検索システム（国立国会図書館）
           </a>
         </p>
-        <p className="text-xs text-gray-300 mt-1">
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <p className="text-xs text-gray-400 leading-relaxed">
+            このサイトは衆議院の記名投票のみを対象としています。
+            全ての採決・参議院の投票は含まれません。
+          </p>
+        </div>
+        <p className="text-xs text-gray-300 mt-4">
           © {new Date().getFullYear()} WHO VOTED. This site is not affiliated
           with the Japanese government.
         </p>

@@ -50,7 +50,7 @@ export default function MemberPage({ params }: Props) {
 
       {/* プロフィール */}
       <div className="flex items-start gap-4 mb-6">
-        <InitialAvatar name={name} size={64} />
+        <InitialAvatar name={name} size={64} faction={member.faction || member.party} />
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -98,7 +98,7 @@ export default function MemberPage({ params }: Props) {
         {member.votes.map((vote, i) => (
           <div key={`${vote.issue_id}-${vote.bill_name}`}>
             <Link
-              href={`/bill/${vote.issue_id}`}
+              href={`/bill/${vote.bill_id || vote.issue_id}`}
               className="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <div className="flex-1 min-w-0">
@@ -133,7 +133,7 @@ export default function MemberPage({ params }: Props) {
           <h2 className="text-lg font-bold text-gray-800 mb-4">
             この議員と似た投票行動
           </h2>
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
             {member.similar_members.map((sm) => (
               <Link
                 key={sm.member_name}
@@ -141,7 +141,7 @@ export default function MemberPage({ params }: Props) {
                 className="border border-gray-100 rounded-lg p-4 hover:border-[#1D9E75] transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <InitialAvatar name={sm.member_name} size={32} />
+                  <InitialAvatar name={sm.member_name} size={32} faction={sm.faction} />
                   <div>
                     <p className="text-sm font-medium text-gray-800">
                       {sm.member_name}
@@ -157,6 +157,13 @@ export default function MemberPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* 注意書き */}
+      <div className="mt-10 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <p className="text-xs text-amber-700 leading-relaxed">
+          ※ このサイトは衆議院の記名投票のみを対象としています。全ての採決・参議院の投票は含まれません。
+        </p>
+      </div>
     </div>
   );
 }

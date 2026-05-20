@@ -19,7 +19,7 @@ export type Member = {
 export type SearchItem = { type: "member" | "bill"; label: string; sub: string; url: string };
 export type Faction = { name: string; count: number };
 export type MakerQuestionMember = { member_name: string; id: string };
-export type MakerQuestion = { bill_name: string; date: string; yeas: MakerQuestionMember[]; nays: MakerQuestionMember[] };
+export type MakerQuestion = { bill_name: string; date: string; description?: string; yeas: MakerQuestionMember[]; nays: MakerQuestionMember[] };
 
 export interface BillMemberEntry {
   member_name: string;
@@ -42,11 +42,20 @@ export type SimilarMember = {
   faction: string | null;
 };
 
+export interface VoteRecord {
+  bill_name: string;
+  date: string;
+  vote: "賛成" | "反対";
+  issue_id: string;
+  session_number: number;
+  bill_id?: string;
+}
+
 export type MemberDetail = {
   member_name: string; id?: string; reading: string | null; party: string | null;
   faction: string | null; constituency: string | null; election_count: number | null;
   total_votes: number; yea_votes: number; nay_votes: number;
-  votes: { bill_name: string; date: string; vote: "賛成" | "反対"; issue_id: string; session_number: number }[];
+  votes: VoteRecord[];
   similar_members: SimilarMember[];
 };
 

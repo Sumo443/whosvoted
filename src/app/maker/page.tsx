@@ -147,6 +147,11 @@ export default function MakerPage() {
         <h2 className="text-lg font-bold text-gray-900 mb-2 leading-relaxed">
           {q.bill_name}
         </h2>
+        {q.description && (
+          <p className="text-sm text-gray-500 mb-2 leading-relaxed">
+            {q.description}
+          </p>
+        )}
         <p className="text-xs text-gray-400 mb-8">{q.date}</p>
 
         <p className="text-sm text-gray-600 mb-4">

@@ -114,11 +114,22 @@ const makerBills = db.prepare(
       AND SUM(CASE WHEN vote='反対' THEN 1 ELSE 0 END) > 0
    ORDER BY date DESC LIMIT 8`
 ).all();
-const makerQuestions = makerBills.map((bill) => {
+// 法案説明を読み込み
+let makerDescriptions = {};
+try {
+  const descPath = path.join(__dirname, "maker-descriptions.json");
+  if (fs.existsSync(descPath)) {
+    const descs = JSON.parse(fs.readFileSync(descPath, "utf-8"));
+    for (const d of descs) { makerDescriptions[d.index] = d.description; }
+  }
+} catch (e) {
+  console.log("  [WARN] maker-descriptions.json の読み込みに失敗:", e.message);
+}
+const makerQuestions = makerBills.map((bill, idx) => {
   const rows = db.prepare(`SELECT member_name, vote FROM votes WHERE bill_name=? AND issue_id=?`).all(bill.bill_name, bill.issue_id);
   const yeas = [], nays = [];
   for (const r of rows) { if (r.vote === "賛成") yeas.push({ member_name: r.member_name, id: memberIdByName[r.member_name] || "" }); else nays.push({ member_name: r.member_name, id: memberIdByName[r.member_name] || "" }); }
-  return { bill_name: bill.bill_name, date: bill.date, yeas, nays };
+  return { bill_name: bill.bill_name, date: bill.date, description: makerDescriptions[idx] || "", yeas, nays };
 });
 fs.writeFileSync(path.join(OUT_DIR, "maker-questions.json"), JSON.stringify(makerQuestions), "utf-8");
 console.log(`  → ${makerQuestions.length}`);
@@ -191,7 +202,7 @@ for (const memberName of memberNames) {
     if (common >= 5) scores.push({ member_name: otherName, match_rate: Math.round((match / common) * 100), common_votes: common });
   }
   scores.sort((a, b) => b.match_rate - a.match_rate || b.common_votes - a.common_votes);
-  const similar = scores.slice(0, 3).map(s => ({
+  const similar = scores.slice(0, 10).map(s => ({
     member_name: s.member_name,
     id: memberIdByName[s.member_name] || "",
     match_rate: s.match_rate,
@@ -204,7 +215,7 @@ for (const memberName of memberNames) {
     faction: mi.faction || null, constituency: mi.constituency || null,
     election_count: mi.election_count || null,
     total_votes: votes.length, yea_votes: yeaCount, nay_votes: nayCount,
-    votes: votes.map(r => ({ bill_name: r.bill_name, date: r.date, vote: r.vote, issue_id: r.issue_id, session_number: r.session_number })),
+    votes: votes.map(r => ({ bill_name: r.bill_name, date: r.date, vote: r.vote, issue_id: r.issue_id, session_number: r.session_number, bill_id: fileSafeId(r.bill_name + '|' + r.issue_id) })),
     similar_members: similar,
   };
   mcnt++;

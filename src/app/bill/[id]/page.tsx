@@ -144,6 +144,13 @@ export default function BillDetailPage({ params }: Props) {
           </div>
         ))}
       </section>
+
+      {/* 注意書き */}
+      <div className="mt-10 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <p className="text-xs text-amber-700 leading-relaxed">
+          ※ このサイトは衆議院の記名投票のみを対象としています。全ての採決・参議院の投票は含まれません。
+        </p>
+      </div>
     </div>
   );
 }
