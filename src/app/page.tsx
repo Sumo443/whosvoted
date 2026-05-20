@@ -23,11 +23,15 @@ export default function HomePage() {
   const allBills: BillSummary[] = getBills();
   const bills = allBills.slice(0, 5);
   const allMembers: Member[] = getMembers();
-  // 当選回数順上位12名（現職中心）
-  const featured = allMembers
-    .filter((m) => m.election_count && m.election_count > 0)
-    .sort((a, b) => (b.election_count || 0) - (a.election_count || 0))
-    .slice(0, 12);
+  // 注目の議員（指名リスト）
+  const featuredNames = [
+    "小泉進次郎", "河野太郎", "高市早苗", "石破茂",
+    "泉健太", "西村智奈美", "金子恵美", "馬場伸幸",
+    "小川淳也", "田中健", "玉木雄一郎", "柏倉祐司",
+  ];
+  const featured = featuredNames
+    .map((name) => allMembers.find((m) => m.member_name === name))
+    .filter((m): m is Member => m !== undefined);
 
   const mkTag = (name: string) => ({ label: name, href: `/member/${allMembers.find(m => m.member_name === name)?.id || ""}` });
   const quickTags = [
