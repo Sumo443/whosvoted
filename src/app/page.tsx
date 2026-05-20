@@ -26,8 +26,8 @@ export default function HomePage() {
   // 注目の議員（指名リスト）
   const featuredNames = [
     "小泉進次郎", "河野太郎", "高市早苗", "石破茂",
-    "泉健太", "西村智奈美", "金子恵美", "馬場伸幸",
-    "小川淳也", "田中健", "玉木雄一郎", "柏倉祐司",
+    "泉健太", "鈴木貴子", "鈴木憲和", "馬場伸幸",
+    "小川淳也", "田中健", "玉木雄一郎", "茂木敏充",
   ];
   const featured = featuredNames
     .map((name) => allMembers.find((m) => m.member_name === name))
