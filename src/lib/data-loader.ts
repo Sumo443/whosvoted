@@ -19,7 +19,7 @@ export type Member = {
 export type SearchItem = { type: "member" | "bill"; label: string; sub: string; url: string };
 export type Faction = { name: string; count: number };
 export type MakerQuestionMember = { member_name: string; id: string };
-export type MakerQuestion = { bill_name: string; date: string; description?: string; yeas: MakerQuestionMember[]; nays: MakerQuestionMember[] };
+export type MakerQuestion = { bill_name: string; date: string; description?: string; question?: string; yeas: MakerQuestionMember[]; nays: MakerQuestionMember[] };
 
 export interface BillMemberEntry {
   member_name: string;

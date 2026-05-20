@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import InitialAvatar from "@/components/InitialAvatar";
 import questionsData from "@/data/maker-questions.json";
@@ -10,13 +10,21 @@ import type { MakerQuestion, Member } from "@/lib/data-loader";
 const questions = questionsData as MakerQuestion[];
 const membersList = membersData as Member[];
 
-type Answer = "賛成" | "反対" | null;
+type AnswerValue = 2 | 1 | 0 | -1 | -2;
+
+const ANSWER_LABELS: { value: AnswerValue; label: string; color: string; bg: string; border: string }[] = [
+  { value: 2, label: "強く賛成", color: "text-[#1D9E75]", bg: "bg-green-50", border: "border-green-200" },
+  { value: 1, label: "やや賛成", color: "text-[#58b99a]", bg: "bg-green-50/50", border: "border-green-100" },
+  { value: 0, label: "中立", color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200" },
+  { value: -1, label: "やや反対", color: "text-[#e67a7a]", bg: "bg-red-50/50", border: "border-red-100" },
+  { value: -2, label: "強く反対", color: "text-red-500", bg: "bg-red-50", border: "border-red-200" },
+];
 
 export default function MakerPage() {
   const [step, setStep] = useState<"intro" | "quiz" | "result">("intro");
   const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState<Answer[]>(
-    new Array(questions.length).fill(null)
+  const [answers, setAnswers] = useState<AnswerValue[]>(
+    new Array(questions.length).fill(null) as unknown as AnswerValue[]
   );
   const [results, setResults] = useState<
     { member_name: string; match_rate: number; faction: string | null; id: string | null }[]
@@ -25,15 +33,14 @@ export default function MakerPage() {
   const progress =
     currentQ > 0 ? Math.round(((currentQ) / questions.length) * 100) : 0;
 
-  const handleAnswer = (vote: "賛成" | "反対") => {
+  const handleAnswer = (value: AnswerValue) => {
     const newAnswers = [...answers];
-    newAnswers[currentQ] = vote;
+    newAnswers[currentQ] = value;
     setAnswers(newAnswers);
 
     if (currentQ < questions.length - 1) {
       setCurrentQ(currentQ + 1);
     } else {
-      // 計算
       calcResults(newAnswers);
     }
   };
@@ -42,15 +49,13 @@ export default function MakerPage() {
     if (currentQ < questions.length - 1) {
       setCurrentQ(currentQ + 1);
     } else {
-      // 全部スキップはありえないが一応
       calcResults([...answers]);
     }
   };
 
-  const calcResults = (finalAnswers: Answer[]) => {
-    // 回答済みの質問のみ計算
+  const calcResults = (finalAnswers: AnswerValue[]) => {
     const answered = finalAnswers
-      .map((a, i) => ({ answer: a, q: questions[i] }))
+      .map((a, i) => ({ answer: a, q: questions[i], index: i }))
       .filter((a) => a.answer !== null);
 
     if (answered.length === 0) {
@@ -59,35 +64,46 @@ export default function MakerPage() {
       return;
     }
 
-    // 全質問の参加者セットを事前計算
-    // 全ての質問に投票記録がある議員のみを対象にする
-    const questionSets = answered.map(({ q }) => ({
+    // Map member vote: 賛成=+1, 反対=-1
+    const memberVoteValue = (name: string, yeas: Set<string>, nays: Set<string>): number | null => {
+      if (yeas.has(name)) return 1;
+      if (nays.has(name)) return -1;
+      return null;
+    };
+
+    // 全質問の参加者セット
+    const questionSets = answered.map(({ q, index }) => ({
+      index,
       yeas: new Set(q.yeas.map(y => y.member_name)),
       nays: new Set(q.nays.map(n => n.member_name)),
     }));
 
-    // 全質問に投票している議員のみフィルタ
+    // 全質問に投票している議員のみ
     const qualifiedMembers = membersList.filter(member => {
       const name = member.member_name;
       return questionSets.every(qs => qs.yeas.has(name) || qs.nays.has(name));
     });
 
-    // スコア計算
-    const scores: Record<string, { match: number; total: number }> = {};
+    // スコア計算（5段階対応）
+    const MAX_DIFF = 4; // user score range: -2..2, member: -1..1 → max |2-(-1)|=3, min |(-2)-1|=3, max diff = 3
+    const memberVoteMax = 1;
+    const memberVoteMin = -1;
 
-    for (const { answer, q } of answered) {
-      const yeaSet = new Set(q.yeas.map(y => y.member_name));
-      const naySet = new Set(q.nays.map(n => n.member_name));
+    const scores: Record<string, { total_pct: number; count: number }> = {};
+
+    for (const { answer: userVal, q, index } of answered) {
+      const qs = questionSets.find(qs => qs.index === index)!;
       for (const member of qualifiedMembers) {
         const name = member.member_name;
-        if (!scores[name]) scores[name] = { match: 0, total: 0 };
-        scores[name].total++;
-        if (
-          (answer === "賛成" && yeaSet.has(name)) ||
-          (answer === "反対" && naySet.has(name))
-        ) {
-          scores[name].match++;
-        }
+        const mv = memberVoteValue(name, qs.yeas, qs.nays);
+        if (mv === null) continue;
+        const diff = Math.abs(userVal - mv);
+        // diff range: 0-3 (when user=2 and member=-1: |2-(-1)|=3)
+        // Normalize to 0-100: when diff=0 → 100%, diff=3 → 25%
+        const pct = Math.round((1 - diff / MAX_DIFF) * 100);
+        if (!scores[name]) scores[name] = { total_pct: 0, count: 0 };
+        scores[name].total_pct += pct;
+        scores[name].count++;
       }
     }
 
@@ -96,7 +112,7 @@ export default function MakerPage() {
         const member = membersList.find((m) => m.member_name === member_name);
         return {
           member_name,
-          match_rate: Math.round((s.match / s.total) * 100),
+          match_rate: Math.round(s.total_pct / s.count),
           faction: member?.faction || null,
           id: member?.id || null,
         };
@@ -112,9 +128,16 @@ export default function MakerPage() {
   const restart = () => {
     setStep("intro");
     setCurrentQ(0);
-    setAnswers(new Array(questions.length).fill(null));
+    setAnswers(new Array(questions.length).fill(null) as unknown as AnswerValue[]);
     setResults([]);
   };
+
+  // 結果用の回答一覧
+  const answeredList = answers
+    .map((a, i) => ({ answer: a, q: questions[i], index: i }))
+    .filter((a) => a.answer !== null) as { answer: AnswerValue; q: MakerQuestion; index: number }[];
+
+  const answerLabel = (val: AnswerValue) => ANSWER_LABELS.find(l => l.value === val)?.label || "";
 
   // === イントロ画面 ===
   if (step === "intro") {
@@ -154,34 +177,25 @@ export default function MakerPage() {
         <p className="text-xs text-gray-400 mb-2">
           {currentQ + 1} / {questions.length}
         </p>
-        <h2 className="text-lg font-bold text-gray-900 mb-2 leading-relaxed">
-          {q.bill_name}
+
+        {/* 質問文（法案名は表示しない） */}
+        <h2 className="text-lg font-bold text-gray-900 mb-4 leading-relaxed">
+          {q.question || q.bill_name}
         </h2>
-        {q.description && (
-          <p className="text-sm text-gray-500 mb-2 leading-relaxed">
-            {q.description}
-          </p>
-        )}
-        <p className="text-xs text-gray-400 mb-8">{q.date}</p>
 
-        <p className="text-sm text-gray-600 mb-4">
-          あなたならどうする？
-        </p>
-
-        <div className="flex gap-3 mb-4">
-          <button
-            onClick={() => handleAnswer("賛成")}
-            className="flex-1 bg-green-50 text-[#1D9E75] font-medium py-3 rounded-xl border border-green-200 hover:bg-green-100 transition-colors"
-          >
-            賛成
-          </button>
-          <button
-            onClick={() => handleAnswer("反対")}
-            className="flex-1 bg-red-50 text-red-500 font-medium py-3 rounded-xl border border-red-200 hover:bg-red-100 transition-colors"
-          >
-            反対
-          </button>
+        {/* 5段階回答 */}
+        <div className="flex flex-col gap-2 mb-4">
+          {ANSWER_LABELS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => handleAnswer(opt.value)}
+              className={`${opt.bg} ${opt.color} ${opt.border} font-medium py-3 px-4 rounded-xl border hover:opacity-80 transition-all text-left`}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
+
         <button
           onClick={handleSkip}
           className="w-full text-xs text-gray-300 hover:text-gray-500 transition-colors"
@@ -206,11 +220,21 @@ export default function MakerPage() {
             </span>
             さんです！
           </h2>
-          <p className="text-sm text-gray-400 mb-8">
-            {answers.filter((a) => a !== null).length}問の判定結果
+          <p className="text-sm text-gray-400 mb-2">
+            {answeredList.length}問の判定結果
           </p>
 
-          <div className="space-y-3 mb-8 text-left">
+          {/* 紹介文 */}
+          <div className="bg-gray-50 rounded-lg p-3 mb-6 text-left">
+            <p className="text-xs text-gray-500 leading-relaxed">
+              あなたと投票行動の傾向が近い議員です。
+              特定の政策を推奨する意図はありません。
+              データは国会会議録に基づいています。
+            </p>
+          </div>
+
+          {/* ランキング */}
+          <div className="space-y-3 mb-6 text-left">
             {results.map((r, i) => (
               <div
                 key={r.member_name}
@@ -242,7 +266,42 @@ export default function MakerPage() {
             ))}
           </div>
 
-          {/* Xシェア（最重要） */}
+          {/* 回答と法案の対応表 */}
+          {answeredList.length > 0 && (
+            <div className="mb-6 text-left">
+              <h3 className="text-sm font-bold text-gray-700 mb-3">
+                あなたの回答
+              </h3>
+              <div className="space-y-2">
+                {answeredList.map((a) => (
+                  <div
+                    key={a.index}
+                    className="text-xs border border-gray-100 rounded-lg p-3"
+                  >
+                    <p className="text-gray-800 font-medium mb-1">
+                      {a.q.question || a.q.bill_name}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400">{a.q.date}</span>
+                      <span
+                        className={`font-medium ${
+                          a.answer > 0
+                            ? "text-[#1D9E75]"
+                            : a.answer < 0
+                            ? "text-red-500"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {answerLabel(a.answer)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Xシェア */}
           {results.length > 0 && (
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(

@@ -125,11 +125,23 @@ try {
 } catch (e) {
   console.log("  [WARN] maker-descriptions.json の読み込みに失敗:", e.message);
 }
+let makerQuestionsText = [];
+try {
+  const qPath = path.join(__dirname, "maker-questions-text.json");
+  if (fs.existsSync(qPath)) {
+    makerQuestionsText = JSON.parse(fs.readFileSync(qPath, "utf-8"));
+  }
+} catch (e) {
+  console.log("  [WARN] maker-questions-text.json の読み込みに失敗:", e.message);
+}
+const makerQuestionTexts = {};
+for (const q of makerQuestionsText) { makerQuestionTexts[q.index] = q.question; }
+
 const makerQuestions = makerBills.map((bill, idx) => {
   const rows = db.prepare(`SELECT member_name, vote FROM votes WHERE bill_name=? AND issue_id=?`).all(bill.bill_name, bill.issue_id);
   const yeas = [], nays = [];
   for (const r of rows) { if (r.vote === "賛成") yeas.push({ member_name: r.member_name, id: memberIdByName[r.member_name] || "" }); else nays.push({ member_name: r.member_name, id: memberIdByName[r.member_name] || "" }); }
-  return { bill_name: bill.bill_name, date: bill.date, description: makerDescriptions[idx] || "", yeas, nays };
+  return { bill_name: bill.bill_name, date: bill.date, description: makerDescriptions[idx] || "", question: makerQuestionTexts[idx] || "", yeas, nays };
 });
 fs.writeFileSync(path.join(OUT_DIR, "maker-questions.json"), JSON.stringify(makerQuestions), "utf-8");
 console.log(`  → ${makerQuestions.length}`);
