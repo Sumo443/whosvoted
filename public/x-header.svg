@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" width="1500" height="500">
+  <rect width="1500" height="500" fill="#111111"/>
+  <!-- Left side: WHO VOTED -->
+  <text x="75" y="265" font-family="Arial, Helvetica Neue, sans-serif" font-weight="900" font-size="72" letter-spacing="0">
+    <tspan fill="#FFFFFF">WHO</tspan>
+    <tspan fill="#1D9E75">VOTED</tspan>
+  </text>
+  <!-- Tagline right side -->
+  <text x="850" y="245" font-family="Arial, Helvetica Neue, sans-serif" font-size="26" fill="#FFFFFF" letter-spacing="3" font-weight="500">
+    <tspan x="850" dy="0">だれが、</tspan>
+    <tspan x="850" dy="40" fill="#1D9E75">賛成</tspan>
+    <tspan dy="0" fill="#FFFFFF">した？</tspan>
+    <tspan x="850" dy="40">だれが、</tspan>
+    <tspan x="850" dy="40" fill="#1D9E75">反対</tspan>
+    <tspan dy="0" fill="#FFFFFF">した？</tspan>
+  </text>
+  <!-- Bottom URL -->
+  <text x="75" y="440" font-family="Arial, Helvetica Neue, sans-serif" font-size="16" fill="#444444" letter-spacing="1">
+    whosvoted.com
+  </text>
+  <!-- Divisor line -->
+  <rect x="75" y="455" width="1350" height="1" fill="#222222"/>
+</svg>

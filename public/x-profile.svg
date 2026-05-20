@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <rect width="400" height="400" fill="#111111"/>
+  <!-- Accent line -->
+  <rect x="60" y="140" width="280" height="3" rx="1.5" fill="#1D9E75"/>
+  <!-- WHO VOTED -->
+  <text x="200" y="210" text-anchor="middle" font-family="Arial, Helvetica Neue, sans-serif" font-weight="900" font-size="56" letter-spacing="0">
+    <tspan fill="#FFFFFF">WHO</tspan>
+    <tspan fill="#1D9E75">VOTED</tspan>
+  </text>
+  <!-- Sub text -->
+  <text x="200" y="250" text-anchor="middle" font-family="Arial, Helvetica Neue, sans-serif" font-size="14" fill="#666666" letter-spacing="2">
+    だれが、賛成した？ 反対した？
+  </text>
+  <!-- Bottom accent line -->
+  <rect x="60" y="270" width="280" height="3" rx="1.5" fill="#1D9E75"/>
+</svg>
