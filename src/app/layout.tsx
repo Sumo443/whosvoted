@@ -39,7 +39,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <meta name="google-site-verification" content="9TJo8tXl2_FZQyJw7c8hXuScs7RD-EjNdj_VdMXc338" />
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5129078857293408" crossorigin="anonymous"></script>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5129078857293408" crossOrigin="anonymous"></script>
       </head>
       <body className="bg-white text-gray-900 min-h-screen flex flex-col">
         <Nav />
