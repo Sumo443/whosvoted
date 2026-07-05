@@ -1,3 +1,6 @@
+# Permanent redirect from Cloudflare Pages domain to custom domain
+https://whosvoted.pages.dev/* https://whosvoted.com/:splat 301
+
 # Cloudflare Pages _redirects
 # Handle 404s for SPA-like routing
 /*    /404.html    404
